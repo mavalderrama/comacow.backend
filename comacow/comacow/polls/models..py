@@ -21,3 +21,6 @@ class Livestock(models.Model):
     price        = models.DecimalField(max_digits=10, decimal_places=2)
     raze         = models.CharField(max_length= 264)
     weigth       = models.DecimalField(max_digits=5, decimal_places=2)
+    
+    def __str__(self):
+        return self.name_cow
