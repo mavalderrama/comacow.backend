@@ -1,54 +1,49 @@
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils.translation import ugettext_lazy as _
+from .managers import CustomUserManager
+from django.utils import timezone
 
 
-class Users(models.Model):
+class User(AbstractBaseUser, PermissionsMixin):
     USER_TYPES = [
         ('FR', 'Farmer'),
         ('BC', 'Big Customer'),
         ('MM', 'Middle Man'),
     ]
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     nit = models.CharField(max_length=200)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(_('email address'), unique=True)
+    username = models.CharField(max_length=200)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
-    pwd = models.CharField(max_length=500)
     user_type = models.CharField(max_length=2, choices=USER_TYPES)
     phone = models.CharField(max_length=200)
     date_created = models.DateField(auto_now_add=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
 
     def get_full_name(self):
         '''
-        Returns the first_name plus the last_name, with a space in between.
+        Returns the username plus the last_name, with a space in between.
         '''
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        full_name = '%s %s' % (self.username, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
         '''
         Returns the short name for the user.
         '''
-        return self.first_name
-
-    # def email_user(self, subject, message, from_email=None, **kwargs):
-    #     '''
-    #     Sends an email to this User.
-    #     '''
-    #     send_mail(subject, message, from_email, [self.email], **kwargs)
-
-
-# @receiver(post_save, sender=User)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#         Users.objects.create(user=instance)
-#
-#
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.profile.save()
-
+        return self.username
 
 
 class Farm(models.Model):

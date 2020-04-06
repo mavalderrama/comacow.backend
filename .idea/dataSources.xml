@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="db.sqlite3" uuid="380d2950-6d79-4af7-b90e-9f7b442d541e">
+    <data-source source="LOCAL" name="db.sqlite3" uuid="dff2e3ab-76ea-449e-9d26-5ac9cdc3ecec">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:D:\repos\personal\comacow.backend\comacow\db.sqlite3</jdbc-url>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/comacow/db.sqlite3</jdbc-url>
     </data-source>
   </component>
 </project>
