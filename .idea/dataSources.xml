@@ -7,5 +7,11 @@
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/comacow/db.sqlite3</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="comacow@localhost" uuid="87d94109-1546-42dd-9201-9ed956a53488">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/comacow</jdbc-url>
+    </data-source>
   </component>
 </project>
