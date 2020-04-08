@@ -1,4 +1,3 @@
-# cookbook/ingredients/schema.py
 import graphene
 
 from graphene_django.types import DjangoObjectType, ObjectType
@@ -37,12 +36,18 @@ class CustomerOrderType(DjangoObjectType):
 
 
 class Query(ObjectType):
+    user = graphene.Field(UserType, username=graphene.String())
     all_users = graphene.List(UserType)
     all_farms = graphene.List(FarmType)
     all_livestocks = graphene.List(LivestockType)
     all_farmorders = graphene.List(FarmOrderType)
     all_middlemanorders = graphene.List(MiddlemanOrderType)
     all_customerorders = graphene.List(CustomerOrderType)
+
+    def resolve_user(self, info, **kwargs):
+        print(kwargs)
+        username = kwargs.get("username")
+        return User.objects.get(username=username)
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all()
@@ -88,4 +93,4 @@ class CreateUser(graphene.Mutation):
         ok = True
         actor_instance = User(name=input.name)
         actor_instance.save()
-        return CreateActor(ok=ok, actor=actor_instance)
+        return CreateUser(ok=ok, actor=actor_instance)

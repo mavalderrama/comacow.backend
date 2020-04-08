@@ -7,4 +7,7 @@ class Query(comacow.polls.schema.Query, ObjectType):
     # as we begin to add more apps to our project
     pass
 
+# class Mutations(comacow.polls.schema.Mutations, ObjectType):
+#     pass
+
 schema = Schema(query=Query)
