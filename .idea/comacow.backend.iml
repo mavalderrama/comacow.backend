@@ -4,8 +4,8 @@
     <facet type="django" name="Django">
       <configuration>
         <option name="rootFolder" value="$MODULE_DIR$/comacow" />
-        <option name="settingsModule" value="comacow/settings.py" />
-        <option name="manageScript" value="manage.py" />
+        <option name="settingsModule" value="" />
+        <option name="manageScript" value="" />
         <option name="environment" value="&lt;map/&gt;" />
         <option name="doNotUseTestRunner" value="false" />
         <option name="trackFilePattern" value="" />
@@ -13,7 +13,9 @@
     </facet>
   </component>
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/comacow" isTestSource="false" />
+    </content>
     <orderEntry type="jdk" jdkName="Python 3.7 (smartbeef)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
