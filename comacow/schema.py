@@ -9,7 +9,11 @@ class Query(comacow.polls.schema.Query, ObjectType):
     pass
 
 
+class Mutation(comacow.polls.schema.Mutation, ObjectType):
+    pass
+
+
 # class Mutations(comacow.polls.schema.Mutations, ObjectType):
 #     pass
 
-schema = Schema(query=Query)
+schema = Schema(query=Query, mutation=Mutation)

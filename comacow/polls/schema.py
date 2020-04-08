@@ -63,6 +63,36 @@ class CustomerOrderNode(DjangoObjectType):
         }
 
 
+class UserMutation(graphene.Mutation):
+    class Arguments:
+        # The input arguments for this mutation
+        nit = graphene.String(required=True)
+        email = graphene.String(required=True)
+        username = graphene.String(required=True)
+        first_name = graphene.String(required=True)
+        last_name = graphene.String(required=True)
+        user_type = graphene.String(required=True)
+        phone = graphene.String(required=False)
+
+    # The class attributes define the response of the mutation
+    user = graphene.Field(UserNode)
+
+    def mutate(
+        self, info, id, nit, email, username, first_name, last_name, user_type, phone
+    ):
+        user = User.objects.get(pk=id)
+        user.nit = nit
+        user.email = email
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.user_type = user_type
+        user.phone = phone
+        user.save()
+        # Notice we return an instance of this mutation
+        return UserMutation(user=user)
+
+
 class Query(ObjectType):
     animal = Node.Field(LivestockNode)
     all_animals = DjangoFilterConnectionField(LivestockNode)
@@ -72,27 +102,5 @@ class Query(ObjectType):
     all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
 
 
-# class UserInput(graphene.InputObjectType):
-#     nit = graphene.String()
-#     email = graphene.String()
-#     username = graphene.String()
-#     first_name = graphene.String()
-#     last_name = graphene.String()
-#     user_type = graphene.String()
-#     phone = graphene.String()
-#     is_active = graphene.Boolean()
-
-
-# class CreateUser(graphene.Mutation):
-#     class Arguments:
-#         input = UserInput(required=True)
-#
-#     ok = graphene.Boolean()
-#     user = graphene.Field(UserType)
-#
-#     @staticmethod
-#     def mutate(root, info, input=None):
-#         ok = True
-#         actor_instance = User(name=input.name)
-#         actor_instance.save()
-#         return CreateUser(ok=ok, actor=actor_instance)
+class Mutation(graphene.ObjectType):
+    update_user = UserMutation.Field()
