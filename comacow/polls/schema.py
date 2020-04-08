@@ -48,29 +48,8 @@ class Query(ObjectType):
     user = graphene.Field(UserType, username=graphene.String())
     animal = Node.Field(LivestockNode)
     all_animals = DjangoFilterConnectionField(LivestockNode)
-    # animal = graphene.Field(
-    #     LivestockType,
-    #     id_animal=graphene.Int(),
-    #     chapeta=graphene.String(),
-    #     animal_type=graphene.String(),
-    #     status=graphene.String(),
-    #     price=graphene.Float(),
-    #     raze=graphene.String(),
-    #     weight=graphene.Float(),
-    # )
     all_users = graphene.List(UserType)
     all_farms = graphene.List(FarmType)
-
-    # all_livestocks = graphene.List(
-    #     LivestockType,
-    #     id_animal=graphene.Int(),
-    #     chapeta=graphene.String(),
-    #     animal_type=graphene.String(),
-    #     status=graphene.String(),
-    #     price=graphene.Float(),
-    #     raze=graphene.String(),
-    #     weight=graphene.Float(),
-    # )
     all_farmorders = graphene.List(FarmOrderType)
     all_middlemanorders = graphene.List(MiddlemanOrderType)
     all_customerorders = graphene.List(CustomerOrderType)
@@ -80,9 +59,6 @@ class Query(ObjectType):
         users = User(ids < id)
         return User.objects.get(**kwargs)
 
-    # def resolve_animal(self, info, **kwargs):
-    #     return Livestock.objects.get(**kwargs)
-
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all()
 
@@ -90,9 +66,6 @@ class Query(ObjectType):
         # We can easily optimize query count in the resolve method
         # return Farm.objects.select_related('category').all()
         return Farm.objects.all()
-
-    # def resolve_all_livestocks(self, info, **kwargs):
-    #     return Livestock.objects.filter(**kwargs).all()
 
     def resolve_all_farmorders(self, info, **kwargs):
         return FarmOrder.objects.all()
