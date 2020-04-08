@@ -22,8 +22,8 @@ class LivestockNode(DjangoObjectType):
         interfaces = (Node,)
         filter_fields = {
             "chapeta": ["exact", "icontains", "istartswith"],
-            "price": ["exact", "gte", "lte"],
-            "weight": ["exact", "gte", "lte"],
+            "price": ["exact", "gte", "lte", "gt", "lt"],
+            "weight": ["exact", "gte", "lte", "gt", "lt"],
             "raze": ["exact", "icontains", "istartswith"],
             "id_farm__id_user": ["exact"],
         }
