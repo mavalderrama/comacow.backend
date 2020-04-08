@@ -132,4 +132,4 @@ dmypy.json
 .pyre/
 
 
-comacow/polls/migrations/*
+#comacow/polls/migrations/*
