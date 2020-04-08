@@ -22,6 +22,15 @@ class UserNode(DjangoObjectType):
 class FarmNode(DjangoObjectType):
     class Meta:
         model = Farm
+        interfaces = (Node,)
+        filter_fields = {
+            "id_farm": ["exact", "icontains", "istartswith"],
+            "n_cow": ["exact", "gte", "lte", "gt", "lt", "range"],
+            "n_bull": ["exact", "gte", "lte", "gt", "lt", "range"],
+            "n_calf": ["exact", "gte", "lte", "gt", "lt", "range"],
+            "id_user__id": ["exact"],
+            "id_user__email": ["exact"],
+        }
 
 
 class LivestockNode(DjangoObjectType):
@@ -41,6 +50,15 @@ class LivestockNode(DjangoObjectType):
 class FarmOrderNode(DjangoObjectType):
     class Meta:
         model = FarmOrder
+        interfaces = (Node,)
+        filter_fields = {
+            "id_order": ["exact", "icontains", "istartswith"],
+            "status": ["exact", "icontains", "istartswith"],
+            "id_user__id": ["exact"],
+            "id_user__user_type": ["icontains","istartswith"],
+            "id_user__email": ["exact"],
+            "id_animal__id_animal": ["exact"],
+        }
 
 
 class MiddlemanOrderNode(DjangoObjectType):
@@ -50,6 +68,7 @@ class MiddlemanOrderNode(DjangoObjectType):
         filter_fields = {
             "id_order": ["exact", "icontains", "istartswith"],
             "status": ["exact", "icontains", "istartswith"],
+            "id_user__user_type": ["icontains", "istartswith"],
             "id_user__id": ["exact"],
             "id_user__email": ["exact"],
             "id_animal__id_animal": ["exact"],
@@ -63,6 +82,7 @@ class CustomerOrderNode(DjangoObjectType):
         filter_fields = {
             "id_order": ["exact", "icontains", "istartswith"],
             "status": ["exact", "icontains", "istartswith"],
+            "id_user__user_type": ["icontains", "istartswith"],
             "id_user__id": ["exact"],
             "id_user__email": ["exact"],
             "id_animal__id_animal": ["exact"],
@@ -78,6 +98,10 @@ class Query(ObjectType):
     all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
     users = Node.Field(UserNode)
     all_users = DjangoFilterConnectionField(UserNode)
+    farmorder = Node.Field(FarmOrderNode)
+    all_farmorder = DjangoFilterConnectionField(FarmOrderNode)
+    farm = Node.Field(FarmNode)
+    all_farm = DjangoFilterConnectionField(FarmNode)
 
 
 # class UserInput(graphene.InputObjectType):
