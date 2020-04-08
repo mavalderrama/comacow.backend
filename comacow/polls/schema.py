@@ -6,12 +6,14 @@ from graphene import Node
 from .models import User, Farm, Livestock, FarmOrder, MiddlemanOrder, CustomerOrder
 
 
-class UserType(DjangoObjectType):
+class UserNode(DjangoObjectType):
     class Meta:
         model = User
+        # interfaces = (Node,)
+        # filter_fields = {}
 
 
-class FarmType(DjangoObjectType):
+class FarmNode(DjangoObjectType):
     class Meta:
         model = Farm
 
@@ -22,9 +24,10 @@ class LivestockNode(DjangoObjectType):
         interfaces = (Node,)
         filter_fields = {
             "chapeta": ["exact", "icontains", "istartswith"],
-            "price": ["exact", "gte", "lte", "gt", "lt"],
-            "weight": ["exact", "gte", "lte", "gt", "lt"],
+            "price": ["exact", "gte", "lte", "gt", "lt", "range"],
+            "weight": ["exact", "gte", "lte", "gt", "lt", "range"],
             "raze": ["exact", "icontains", "istartswith"],
+            "status": ["exact"],
             "id_farm__id_user": ["exact"],
         }
 
@@ -34,70 +37,60 @@ class FarmOrderType(DjangoObjectType):
         model = FarmOrder
 
 
-class MiddlemanOrderType(DjangoObjectType):
+class MiddlemanOrderNode(DjangoObjectType):
     class Meta:
         model = MiddlemanOrder
+        interfaces = (Node,)
+        filter_fields = {
+            "id_order": ["exact", "icontains", "istartswith"],
+            "status": ["exact", "icontains", "istartswith"],
+            "id_user__id": ["exact"],
+            "id_user__email": ["exact"],
+            "id_animal__id_animal": ["exact"],
+        }
 
 
 class CustomerOrderType(DjangoObjectType):
     class Meta:
         model = CustomerOrder
+        interfaces = (Node,)
+        filter_fields = {
+            "id_order": ["exact", "icontains", "istartswith"],
+            "status": ["exact", "icontains", "istartswith"],
+            "id_user__id": ["exact"],
+            "id_user__email": ["exact"],
+            "id_animal__id_animal": ["exact"],
+        }
 
 
 class Query(ObjectType):
-    user = graphene.Field(UserType, username=graphene.String())
     animal = Node.Field(LivestockNode)
     all_animals = DjangoFilterConnectionField(LivestockNode)
-    all_users = graphene.List(UserType)
-    all_farms = graphene.List(FarmType)
-    all_farmorders = graphene.List(FarmOrderType)
-    all_middlemanorders = graphene.List(MiddlemanOrderType)
-    all_customerorders = graphene.List(CustomerOrderType)
-
-    def resolve_user(self, info, **kwargs):
-        ids = kwargs.get("id")
-        users = User(ids < id)
-        return User.objects.get(**kwargs)
-
-    def resolve_all_users(self, info, **kwargs):
-        return User.objects.all()
-
-    def resolve_all_farms(self, info, **kwargs):
-        # We can easily optimize query count in the resolve method
-        # return Farm.objects.select_related('category').all()
-        return Farm.objects.all()
-
-    def resolve_all_farmorders(self, info, **kwargs):
-        return FarmOrder.objects.all()
-
-    def resolve_all_middlemanorders(self, info, **kwargs):
-        return MiddlemanOrder.objects.all()
-
-    def resolve_all_customerorders(self, info, **kwargs):
-        return CustomerOrder.objects.all()
+    middlemanorder = Node.Field(MiddlemanOrderNode)
+    all_middlemanorders = DjangoFilterConnectionField(MiddlemanOrderNode)
 
 
-class UserInput(graphene.InputObjectType):
-    nit = graphene.String()
-    email = graphene.String()
-    username = graphene.String()
-    first_name = graphene.String()
-    last_name = graphene.String()
-    user_type = graphene.String()
-    phone = graphene.String()
-    is_active = graphene.Boolean()
+# class UserInput(graphene.InputObjectType):
+#     nit = graphene.String()
+#     email = graphene.String()
+#     username = graphene.String()
+#     first_name = graphene.String()
+#     last_name = graphene.String()
+#     user_type = graphene.String()
+#     phone = graphene.String()
+#     is_active = graphene.Boolean()
 
 
-class CreateUser(graphene.Mutation):
-    class Arguments:
-        input = UserInput(required=True)
-
-    ok = graphene.Boolean()
-    user = graphene.Field(UserType)
-
-    @staticmethod
-    def mutate(root, info, input=None):
-        ok = True
-        actor_instance = User(name=input.name)
-        actor_instance.save()
-        return CreateUser(ok=ok, actor=actor_instance)
+# class CreateUser(graphene.Mutation):
+#     class Arguments:
+#         input = UserInput(required=True)
+#
+#     ok = graphene.Boolean()
+#     user = graphene.Field(UserType)
+#
+#     @staticmethod
+#     def mutate(root, info, input=None):
+#         ok = True
+#         actor_instance = User(name=input.name)
+#         actor_instance.save()
+#         return CreateUser(ok=ok, actor=actor_instance)
