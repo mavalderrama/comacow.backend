@@ -9,8 +9,14 @@ from .models import User, Farm, Livestock, FarmOrder, MiddlemanOrder, CustomerOr
 class UserNode(DjangoObjectType):
     class Meta:
         model = User
-        # interfaces = (Node,)
-        # filter_fields = {}
+        interfaces = (Node,)
+        filter_fields = {
+            "id": ["exact", "gte", "lte", "gt", "lt", "range"],
+            "email": ["exact", "icontains", "istartswith"],
+            "username": ["exact", "icontains", "istartswith"],
+            "user_type": ["exact", "icontains", "istartswith"],
+            #"date_joined": []
+        }
 
 
 class FarmNode(DjangoObjectType):
@@ -70,6 +76,8 @@ class Query(ObjectType):
     all_middlemanorders = DjangoFilterConnectionField(MiddlemanOrderNode)
     customerorder = Node.Field(CustomerOrderNode)
     all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
+    users = Node.Field(UserNode)
+    all_users = DjangoFilterConnectionField(UserNode)
 
 
 # class UserInput(graphene.InputObjectType):

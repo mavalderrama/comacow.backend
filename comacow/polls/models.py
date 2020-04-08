@@ -21,7 +21,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=200)
     user_type = models.CharField(max_length=2, choices=USER_TYPES)
     phone = models.CharField(max_length=200)
-    date_created = models.DateField(auto_now_add=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
