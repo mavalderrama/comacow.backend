@@ -37,6 +37,7 @@ class CustomerOrderType(DjangoObjectType):
 
 class Query(ObjectType):
     user = graphene.Field(UserType, username=graphene.String())
+    animal = graphene.Field(LivestockType, animal_type=graphene.String())
     all_users = graphene.List(UserType)
     all_farms = graphene.List(FarmType)
     all_livestocks = graphene.List(LivestockType)
@@ -45,9 +46,12 @@ class Query(ObjectType):
     all_customerorders = graphene.List(CustomerOrderType)
 
     def resolve_user(self, info, **kwargs):
-        print(kwargs)
         username = kwargs.get("username")
         return User.objects.get(username=username)
+
+    def resolve_animal(self, info, **kwargs):
+        animal_type = kwargs.get("animal_type")
+        return Livestock.objects.get(animal_type=animal_type)
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all()

@@ -95,6 +95,9 @@ class FarmOrder(models.Model):
     status = models.CharField(max_length=2, choices=STATUS)
     details = models.CharField(max_length=500)
 
+    def __str__(self):
+        return str(self.id_order)
+
 
 class MiddlemanOrder(models.Model):
     id_order = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -104,7 +107,7 @@ class MiddlemanOrder(models.Model):
     id_animal = models.ForeignKey(Livestock, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.status)
+        return str(self.id_order)
 
 
 class CustomerOrder(models.Model):
