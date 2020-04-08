@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Migrations files
-polls/migrations/
+
 
 # Distribution / packaging
 .Python
@@ -132,3 +132,4 @@ dmypy.json
 .pyre/
 
 
+comacow/polls/migrations/*
