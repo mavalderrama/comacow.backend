@@ -32,7 +32,7 @@ class LivestockNode(DjangoObjectType):
         }
 
 
-class FarmOrderType(DjangoObjectType):
+class FarmOrderNode(DjangoObjectType):
     class Meta:
         model = FarmOrder
 
@@ -50,7 +50,7 @@ class MiddlemanOrderNode(DjangoObjectType):
         }
 
 
-class CustomerOrderType(DjangoObjectType):
+class CustomerOrderNode(DjangoObjectType):
     class Meta:
         model = CustomerOrder
         interfaces = (Node,)
@@ -68,6 +68,8 @@ class Query(ObjectType):
     all_animals = DjangoFilterConnectionField(LivestockNode)
     middlemanorder = Node.Field(MiddlemanOrderNode)
     all_middlemanorders = DjangoFilterConnectionField(MiddlemanOrderNode)
+    customerorder = Node.Field(CustomerOrderNode)
+    all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
 
 
 # class UserInput(graphene.InputObjectType):
