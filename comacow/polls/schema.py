@@ -15,7 +15,7 @@ class UserNode(DjangoObjectType):
             "email": ["exact", "icontains", "istartswith"],
             "username": ["exact", "icontains", "istartswith"],
             "user_type": ["exact", "icontains", "istartswith"],
-            #"date_joined": []
+            # "date_joined": []
         }
 
 
@@ -55,7 +55,7 @@ class FarmOrderNode(DjangoObjectType):
             "id_order": ["exact", "icontains", "istartswith"],
             "status": ["exact", "icontains", "istartswith"],
             "id_user__id": ["exact"],
-            "id_user__user_type": ["icontains","istartswith"],
+            "id_user__user_type": ["icontains", "istartswith"],
             "id_user__email": ["exact"],
             "id_animal__id_animal": ["exact"],
         }
