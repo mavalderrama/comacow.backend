@@ -111,15 +111,16 @@ class UpdateUser(graphene.Mutation):
     @staticmethod
     def mutate(root, info, id, input=None):
         ok = False
-        user_instance = User.objects.get(pk=id)
-        if user_instance and input:
-
-            ok = True
-            for k, v in input.items():
-                setattr(user_instance, k, v)
-            user_instance.save()
-            return UpdateUser(ok=ok, user=user_instance)
-        return UpdateUser(ok=ok, user=None)
+        try:
+            user_instance = User.objects.get(pk=id)
+            if user_instance and input:
+                for k, v in input.items():
+                    setattr(user_instance, k, v)
+                user_instance.save()
+                ok = True
+                return UpdateUser(ok=ok, user=user_instance)
+        except:
+            return UpdateUser(ok=ok, user=None)
 
 
 class Query(graphene.ObjectType):
@@ -129,8 +130,8 @@ class Query(graphene.ObjectType):
     all_middlemanorders = DjangoFilterConnectionField(MiddlemanOrderNode)
     customerorder = Node.Field(CustomerOrderNode)
     all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
-    # users = Node.Field(UserNode)
-    # all_users = DjangoFilterConnectionField(UserNode)
+    users = Node.Field(UserNode)
+    all_users = DjangoFilterConnectionField(UserNode)
     farmorder = Node.Field(FarmOrderNode)
     all_farmorder = DjangoFilterConnectionField(FarmOrderNode)
     farm = Node.Field(FarmNode)
