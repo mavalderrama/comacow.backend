@@ -126,8 +126,26 @@ class CreateUser(graphene.Mutation):
             return CreateUser(ok=ok, user=None)
 
 
-# class DeleteUser(graphene.Mutation):
-#     pass
+class DeleteUser(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=False)
+        input = UserInput(required=True)
+
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(root, info, id=None, input=None):
+        ok = False
+        try:
+            if "email" in input:
+                user_instance = User.objects.get(email=input.email)
+            else:
+                user_instance = User.objects.get(pk=id)
+            user_instance.delete()
+            ok = True
+            return DeleteUser(ok=ok)
+        except:
+            return DeleteUser(ok=ok)
 
 
 class UpdateUser(graphene.Mutation):
@@ -174,3 +192,4 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     update_user = UpdateUser.Field()
+    delete_user = DeleteUser.Field()
