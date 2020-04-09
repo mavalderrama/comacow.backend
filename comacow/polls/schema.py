@@ -98,6 +98,36 @@ class UserInput(graphene.InputObjectType):
     last_name = graphene.String(required=False)
     user_type = graphene.String(required=False)
     phone = graphene.String(required=False)
+    password = graphene.String(required=False)
+
+
+class CreateUser(graphene.Mutation):
+    class Arguments:
+        input = UserInput(required=True)
+
+    ok = graphene.Boolean()
+    create_user = graphene.Field(UserNode)
+
+    @staticmethod
+    def mutate(root, info, input=None):
+        ok = False
+        try:
+            user_instance = User()
+            if user_instance and input:
+                for k, v in input.items():
+                    if k == "password":
+                        user_instance.set_password(v)
+                    else:
+                        setattr(user_instance, k, v)
+                user_instance.save()
+                ok = True
+                return CreateUser(ok=ok, create_user=user_instance)
+        except:
+            return CreateUser(ok=ok, create_user=None)
+
+
+class DeleteUser(graphene.Mutation):
+    pass
 
 
 class UpdateUser(graphene.Mutation):
@@ -106,7 +136,7 @@ class UpdateUser(graphene.Mutation):
         input = UserInput(required=True)
 
     ok = graphene.Boolean()
-    user = graphene.Field(UserNode)
+    update_user = graphene.Field(UserNode)
 
     @staticmethod
     def mutate(root, info, id, input=None):
@@ -115,12 +145,15 @@ class UpdateUser(graphene.Mutation):
             user_instance = User.objects.get(pk=id)
             if user_instance and input:
                 for k, v in input.items():
-                    setattr(user_instance, k, v)
+                    if k == "password":
+                        user_instance.set_password(v)
+                    else:
+                        setattr(user_instance, k, v)
                 user_instance.save()
                 ok = True
-                return UpdateUser(ok=ok, user=user_instance)
+                return UpdateUser(ok=ok, update_user=user_instance)
         except:
-            return UpdateUser(ok=ok, user=None)
+            return UpdateUser(ok=ok, update_user=None)
 
 
 class Query(graphene.ObjectType):
@@ -139,5 +172,5 @@ class Query(graphene.ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    # create_user = CreateUser.Field()
+    create_user = CreateUser.Field()
     update_user = UpdateUser.Field()
