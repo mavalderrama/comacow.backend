@@ -9,14 +9,14 @@ from .models import User, Farm, Livestock, FarmOrder, MiddlemanOrder, CustomerOr
 class UserNode(DjangoObjectType):
     class Meta:
         model = User
-        interfaces = (Node,)
-        filter_fields = {
-            "id": ["exact", "gte", "lte", "gt", "lt", "range"],
-            "email": ["exact", "icontains", "istartswith"],
-            "username": ["exact", "icontains", "istartswith"],
-            "user_type": ["exact", "icontains", "istartswith"],
-            # "date_joined": []
-        }
+        # interfaces = (Node,)
+        # filter_fields = {
+        #     "id": ["exact", "icontains", "istartswith"],
+        #     "email": ["exact", "icontains", "istartswith"],
+        #     "username": ["exact", "icontains", "istartswith"],
+        #     "user_type": ["exact", "icontains", "istartswith"],
+        #     # "date_joined": []
+        # }
 
 
 class FarmNode(DjangoObjectType):
@@ -101,22 +101,22 @@ class UserMutation(graphene.Mutation):
         phone = graphene.String(required=False)
 
     # The class attributes define the response of the mutation
-    user = graphene.Field(UserNode)
+    user_set = graphene.Field(UserNode)
 
     def mutate(
         self, info, id, nit, email, username, first_name, last_name, user_type, phone
     ):
-        user = User.objects.get(pk=id)
-        user.nit = nit
-        user.email = email
-        user.username = username
-        user.first_name = first_name
-        user.last_name = last_name
-        user.user_type = user_type
-        user.phone = phone
-        user.save()
+        user_set = User.objects.get(pk=id)
+        user_set.nit = nit
+        user_set.email = email
+        user_set.username = username
+        user_set.first_name = first_name
+        user_set.last_name = last_name
+        user_set.user_type = user_type
+        user_set.phone = phone
+        user_set.save()
         # Notice we return an instance of this mutation
-        return UserMutation(user=user)
+        return UserMutation(user=user_set)
 
 
 class Query(ObjectType):
@@ -126,8 +126,8 @@ class Query(ObjectType):
     all_middlemanorders = DjangoFilterConnectionField(MiddlemanOrderNode)
     customerorder = Node.Field(CustomerOrderNode)
     all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
-    users = Node.Field(UserNode)
-    all_users = DjangoFilterConnectionField(UserNode)
+    # users = Node.Field(UserNode)
+    # all_users = DjangoFilterConnectionField(UserNode)
     farmorder = Node.Field(FarmOrderNode)
     all_farmorder = DjangoFilterConnectionField(FarmOrderNode)
     farm = Node.Field(FarmNode)
