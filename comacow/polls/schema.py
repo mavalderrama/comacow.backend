@@ -1,5 +1,6 @@
 import graphene
 from graphene_django.types import DjangoObjectType, ObjectType
+from graphene import Schema, relay, resolve_only_args
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene import Node
 
@@ -9,14 +10,14 @@ from .models import User, Farm, Livestock, FarmOrder, MiddlemanOrder, CustomerOr
 class UserNode(DjangoObjectType):
     class Meta:
         model = User
-        # interfaces = (Node,)
-        # filter_fields = {
-        #     "id": ["exact", "icontains", "istartswith"],
-        #     "email": ["exact", "icontains", "istartswith"],
-        #     "username": ["exact", "icontains", "istartswith"],
-        #     "user_type": ["exact", "icontains", "istartswith"],
-        #     # "date_joined": []
-        # }
+        interfaces = (Node,)
+        filter_fields = {
+            "id": ["exact", "icontains", "istartswith"],
+            "email": ["exact", "icontains", "istartswith"],
+            "username": ["exact", "icontains", "istartswith"],
+            "user_type": ["exact", "icontains", "istartswith"],
+            # "date_joined": []
+        }
 
 
 class FarmNode(DjangoObjectType):
@@ -89,37 +90,39 @@ class CustomerOrderNode(DjangoObjectType):
         }
 
 
-class UserMutation(graphene.Mutation):
+class UserInput(graphene.InputObjectType):
+    nit = graphene.String(required=False)
+    email = graphene.String(required=False)
+    username = graphene.String(required=False)
+    first_name = graphene.String(required=False)
+    last_name = graphene.String(required=False)
+    user_type = graphene.String(required=False)
+    phone = graphene.String(required=False)
+
+
+class UpdateUser(graphene.Mutation):
     class Arguments:
-        # The input arguments for this mutation
-        nit = graphene.String(required=True)
-        email = graphene.String(required=True)
-        username = graphene.String(required=True)
-        first_name = graphene.String(required=True)
-        last_name = graphene.String(required=True)
-        user_type = graphene.String(required=True)
-        phone = graphene.String(required=False)
+        id = graphene.ID()
+        input = UserInput(required=True)
 
-    # The class attributes define the response of the mutation
-    user_set = graphene.Field(UserNode)
+    ok = graphene.Boolean()
+    user = graphene.Field(UserNode)
 
-    def mutate(
-        self, info, id, nit, email, username, first_name, last_name, user_type, phone
-    ):
-        user_set = User.objects.get(pk=id)
-        user_set.nit = nit
-        user_set.email = email
-        user_set.username = username
-        user_set.first_name = first_name
-        user_set.last_name = last_name
-        user_set.user_type = user_type
-        user_set.phone = phone
-        user_set.save()
-        # Notice we return an instance of this mutation
-        return UserMutation(user=user_set)
+    @staticmethod
+    def mutate(root, info, id, input=None):
+        ok = False
+        user_instance = User.objects.get(pk=id)
+        if user_instance and input:
+
+            ok = True
+            for k, v in input.items():
+                setattr(user_instance, k, v)
+            user_instance.save()
+            return UpdateUser(ok=ok, user=user_instance)
+        return UpdateUser(ok=ok, user=None)
 
 
-class Query(ObjectType):
+class Query(graphene.ObjectType):
     animal = Node.Field(LivestockNode)
     all_animals = DjangoFilterConnectionField(LivestockNode)
     middlemanorder = Node.Field(MiddlemanOrderNode)
@@ -135,4 +138,5 @@ class Query(ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    update_user = UserMutation.Field()
+    # create_user = CreateUser.Field()
+    update_user = UpdateUser.Field()
