@@ -106,7 +106,7 @@ class CreateUser(graphene.Mutation):
         input = UserInput(required=True)
 
     ok = graphene.Boolean()
-    create_user = graphene.Field(UserNode)
+    user = graphene.Field(UserNode)
 
     @staticmethod
     def mutate(root, info, input=None):
@@ -121,13 +121,13 @@ class CreateUser(graphene.Mutation):
                         setattr(user_instance, k, v)
                 user_instance.save()
                 ok = True
-                return CreateUser(ok=ok, create_user=user_instance)
+                return CreateUser(ok=ok, user=user_instance)
         except:
-            return CreateUser(ok=ok, create_user=None)
+            return CreateUser(ok=ok, user=None)
 
 
-class DeleteUser(graphene.Mutation):
-    pass
+# class DeleteUser(graphene.Mutation):
+#     pass
 
 
 class UpdateUser(graphene.Mutation):
@@ -136,7 +136,7 @@ class UpdateUser(graphene.Mutation):
         input = UserInput(required=True)
 
     ok = graphene.Boolean()
-    update_user = graphene.Field(UserNode)
+    user = graphene.Field(UserNode)
 
     @staticmethod
     def mutate(root, info, id, input=None):
@@ -151,9 +151,9 @@ class UpdateUser(graphene.Mutation):
                         setattr(user_instance, k, v)
                 user_instance.save()
                 ok = True
-                return UpdateUser(ok=ok, update_user=user_instance)
+                return UpdateUser(ok=ok, user=user_instance)
         except:
-            return UpdateUser(ok=ok, update_user=None)
+            return UpdateUser(ok=ok, user=None)
 
 
 class Query(graphene.ObjectType):
