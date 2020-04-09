@@ -91,6 +91,7 @@ class CustomerOrderNode(DjangoObjectType):
 
 
 class UserInput(graphene.InputObjectType):
+    id = graphene.ID(required=False)
     nit = graphene.String(required=False)
     email = graphene.String(required=False)
     username = graphene.String(required=False)
@@ -99,6 +100,13 @@ class UserInput(graphene.InputObjectType):
     user_type = graphene.String(required=False)
     phone = graphene.String(required=False)
     password = graphene.String(required=False)
+
+
+class CustomerOrderInput(graphene.InputObjectType):
+    status = graphene.String(required=False)
+    details = graphene.String(required=False)
+    id_user = graphene.Field(required=True)
+    # id_animal = graphene.Field(LivestockInput)
 
 
 class CreateUser(graphene.Mutation):
@@ -113,6 +121,7 @@ class CreateUser(graphene.Mutation):
         ok = False
         try:
             user_instance = User()
+            farm_order = FarmOrder()
             if user_instance and input:
                 for k, v in input.items():
                     if k == "password":
@@ -172,6 +181,31 @@ class UpdateUser(graphene.Mutation):
                 return UpdateUser(ok=ok, user=user_instance)
         except:
             return UpdateUser(ok=ok, user=None)
+
+
+# class CreateCustomerOrder(graphene.Mutation):
+#     class Arguments:
+#         input = CustomerOrderInput(required=True)
+#
+#     ok = graphene.Boolean()
+#     customer_order = graphene.Field(CustomerOrderNode)
+#
+#     @staticmethod
+#     def mutate(root, info, input=None):
+#         ok = False
+#         try:
+#             customer_order_instance = CustomerOrder()
+#             if customer_order_instance and input:
+#                 for k, v in input.items():
+#                     if input
+#                     setattr(customer_order_instance, k, v)
+#                 customer_order_instance.save()
+#                 ok = True
+#                 return CreateCustomerOrder(
+#                     ok=ok, customer_order=customer_order_instance
+#                 )
+#         except:
+#             return CreateCustomerOrder(ok=ok, customer_order=None)
 
 
 class Query(graphene.ObjectType):
