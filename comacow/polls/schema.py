@@ -1,6 +1,5 @@
 import graphene
-from graphene_django.types import DjangoObjectType, ObjectType
-from graphene import Schema, relay, resolve_only_args
+from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene import Node
 
@@ -107,20 +106,23 @@ class LivestockInput(graphene.InputObjectType):
 
 
 class FarmOrderInput(graphene.InputObjectType):
+    id_order = graphene.ID()
     id_animal_id = graphene.Field(LivestockInput)
     id_user_id = graphene.Field(UserInput)
     status = graphene.String(required=False)
-    detail = graphene.String(required=False)
+    details = graphene.String(required=False)
 
 
 class MiddlemanOrderInput(graphene.InputObjectType):
+    id_order = graphene.ID()
     id_animal_id = graphene.Field(LivestockInput)
     id_user_id = graphene.Field(UserInput)
     status = graphene.String(required=False)
-    detail = graphene.String(required=False)
+    details = graphene.String(required=False)
 
 
 class CustomerOrderInput(graphene.InputObjectType):
+    id_order = graphene.ID()
     id_user_id = graphene.Field(UserInput)
     id_animal_id = graphene.Field(LivestockInput)
     status = graphene.String(required=False)
@@ -189,11 +191,11 @@ class UpdateUser(graphene.Mutation):
         try:
             user_instance = User.objects.get(pk=id)
             if user_instance and input:
-                for k, v in input.items():
-                    if k == "password":
-                        user_instance.set_password(v)
+                for key, value in input.items():
+                    if key == "password":
+                        user_instance.set_password(value)
                     else:
-                        setattr(user_instance, k, v)
+                        setattr(user_instance, key, value)
                 user_instance.save()
                 ok = True
                 return UpdateUser(ok=ok, user=user_instance)
@@ -201,29 +203,84 @@ class UpdateUser(graphene.Mutation):
             return UpdateUser(ok=ok, user=None)
 
 
-# class CreateCustomerOrder(graphene.Mutation):
-#     class Arguments:
-#         input = CustomerOrderInput(required=True)
-#
-#     ok = graphene.Boolean()
-#     customer_order = graphene.Field(CustomerOrderNode)
-#
-#     @staticmethod
-#     def mutate(root, info, input=None):
-#         ok = False
-#         try:
-#             customer_order_instance = CustomerOrder()
-#             if customer_order_instance and input:
-#                 for k, v in input.items():
-#                     if input
-#                     setattr(customer_order_instance, k, v)
-#                 customer_order_instance.save()
-#                 ok = True
-#                 return CreateCustomerOrder(
-#                     ok=ok, customer_order=customer_order_instance
-#                 )
-#         except:
-#             return CreateCustomerOrder(ok=ok, customer_order=None)
+class CreateCustomerOrder(graphene.Mutation):
+    class Arguments:
+        input = CustomerOrderInput(required=True)
+
+    ok = graphene.Boolean()
+    customer_order = graphene.Field(CustomerOrderNode)
+
+    @staticmethod
+    def mutate(root, info, input=None):
+        ok = False
+        try:
+            customer_order_instance = CustomerOrder()
+            user_instance = User.objects.get(pk=input.id_user_id.id)
+            animal_instance = Livestock.objects.get(pk=input.id_animal_id.id_animal)
+            if customer_order_instance and input:
+                for key, value in input.items():
+                    if key != "id_user_id" and key != "id_animal_id":
+                        setattr(customer_order_instance, key, value)
+                setattr(customer_order_instance, "id_user_id", user_instance.id)
+                setattr(
+                    customer_order_instance, "id_animal_id", animal_instance.id_animal
+                )
+                customer_order_instance.save()
+                ok = True
+                return CreateCustomerOrder(
+                    ok=ok, customer_order=customer_order_instance
+                )
+        except:
+            return CreateCustomerOrder(ok=ok, customer_order=None)
+
+
+class UpdateCustomerOrder(graphene.Mutation):
+    class Arguments:
+        input = CustomerOrderInput(required=True)
+
+    ok = graphene.Boolean()
+    customer_order = graphene.Field(CustomerOrderNode)
+
+    @staticmethod
+    def mutate(root, info, input=None):
+        ok = False
+        try:
+            id_order = input.id_order
+            customer_order_instance = CustomerOrder.objects.get(pk=id_order)
+            if customer_order_instance and input:
+                for key, value in input.items():
+                    setattr(customer_order_instance, key, value)
+                customer_order_instance.save()
+                ok = True
+                return UpdateCustomerOrder(
+                    ok=ok, customer_order=customer_order_instance
+                )
+        except Exception as ex:
+            print(ex)
+            return UpdateCustomerOrder(ok=ok, customer_order=None)
+
+
+class DeleteCustomerOrder(graphene.Mutation):
+    class Arguments:
+        pk = graphene.ID(required=False)
+        input = CustomerOrderInput(required=True)
+
+    ok = graphene.Boolean()
+    error = graphene.String()
+
+    @staticmethod
+    def mutate(root, info, pk=None, input=None):
+        ok = False
+        try:
+            if "id_order" in input:
+                customer_order_instance = CustomerOrder.objects.get(pk=input.id_order)
+            else:
+                customer_order_instance = CustomerOrder.objects.get(pk=pk)
+            customer_order_instance.delete()
+            ok = True
+            return DeleteCustomerOrder(ok=ok, error=None)
+        except Exception as ex:
+            return DeleteCustomerOrder(ok=ok, error=str(ex))
 
 
 class CreateFarmOrder(graphene.Mutation):
@@ -241,9 +298,9 @@ class CreateFarmOrder(graphene.Mutation):
             user_instance = User.objects.get(pk=input.id_user_id.id)
             animal_instance = Livestock.objects.get(pk=input.id_animal_id.id_animal)
             if farm_order_instance and input:
-                for k, v in input.items():
-                    if k != "id_user_id" and k != "id_animal_id":
-                        setattr(farm_order_instance, k, v)
+                for key, value in input.items():
+                    if key != "id_user_id" and key != "id_animal_id":
+                        setattr(farm_order_instance, key, value)
                 setattr(farm_order_instance, "id_user_id", user_instance.id)
                 setattr(farm_order_instance, "id_animal_id", animal_instance.id_animal)
                 farm_order_instance.save()
@@ -253,107 +310,161 @@ class CreateFarmOrder(graphene.Mutation):
             return CreateFarmOrder(ok=ok, farm_order=None)
 
 
-# class DeleteFarmOrderNode(graphene.Mutation):
-#     pass
+class UpdateFarmOrder(graphene.Mutation):
+    class Arguments:
+        input = FarmOrderInput(required=True)
+
+    ok = graphene.Boolean()
+    error = graphene.String()
+    farm_order = graphene.Field(FarmOrderNode)
+
+    @staticmethod
+    def mutate(root, info, input=None):
+        ok = False
+        try:
+            id_order = input.id_order
+            farm_order_instance = FarmOrder.objects.get(pk=id_order)
+            if farm_order_instance and input:
+                for key, value in input.items():
+                    setattr(farm_order_instance, key, value)
+                farm_order_instance.save()
+                ok = True
+                return UpdateFarmOrder(
+                    ok=ok, farm_order=farm_order_instance, error=None
+                )
+        except Exception as ex:
+            return UpdateFarmOrder(ok=ok, farm_order=None, error=str(ex))
 
 
-# class UpdateFarmOrder(graphene.Mutation):
-#     class Arguments:
-#         id = graphene.ID()
-#         input = FarmOrderInput(required=True)
-#
-#     ok = graphene.Boolean()
-#     update_user = graphene.Field(UserNode)
-#
-#     @staticmethod
-#     def mutate(root, info, id, input=None):
-#         ok = False
-#         try:
-#             user_instance = FarmOrder.objects.get(pk=id)
-#             if user_instance and input:
-#                 for k, v in input.items():
-#                     setattr(user_instance, k, v)
-#                 user_instance.save()
-#                 ok = True
-#                 return UpdateFarmOrder(ok=ok, update_user=user_instance)
-#         except:
-#             return UpdateFarmOrder(ok=ok, update_user=None)
+class DeleteFarmOrder(graphene.Mutation):
+    class Arguments:
+        pk = graphene.ID(required=False)
+        input = FarmOrderInput(required=True)
+
+    ok = graphene.Boolean()
+    error = graphene.String()
+
+    @staticmethod
+    def mutate(root, info, pk=None, input=None):
+        ok = False
+        try:
+            if "id_order" in input:
+                farm_order_instance = FarmOrder.objects.get(pk=input.id_order)
+            else:
+                farm_order_instance = FarmOrder.objects.get(pk=pk)
+            farm_order_instance.delete()
+            ok = True
+            return DeleteFarmOrder(ok=ok, error="")
+        except Exception as ex:
+            return DeleteFarmOrder(ok=ok, error=str(ex))
 
 
-# class CreateMiddlemanOrder(graphene.Mutation):
-#     class Arguments:
-#         input = MiddlemanOrderInput(required=True)
-#
-#     ok = graphene.Boolean()
-#     farm_order = graphene.Field(MiddlemanOrderNode)
-#
-#     @staticmethod
-#     def mutate(root, info, input=None):
-#         ok = False
-#         try:
-#             farm_order_instance = FarmOrder()
-#             user_instance = User.objects.get(pk=input.id_user.id)
-#             animal_instance = Livestock.objects.get(pk=input.id_animal.id_animal)
-#             if farm_order_instance and input:
-#                 for k, v in input.items():
-#                     if k != "id_user" and k != "id_animal":
-#                         setattr(farm_order_instance, k, v)
-#                 farm_order_instance.id_user.set(user_instance)
-#                 farm_order_instance.id_animal.set(animal_instance)
-#                 farm_order_instance.save()
-#                 ok = True
-#                 return CreateFarmOrder(ok=ok, farm_order=farm_order_instance)
-#         except:
-#             return CreateFarmOrder(ok=ok, farm_order=None)
+class CreateMiddlemanOrder(graphene.Mutation):
+    class Arguments:
+        input = MiddlemanOrderInput(required=True)
 
+    ok = graphene.Boolean()
+    error = graphene.String()
+    middleman_order = graphene.Field(MiddlemanOrderNode)
 
-# class DeleteFarmOrderNode(graphene.Mutation):
-#     pass
+    @staticmethod
+    def mutate(root, info, input=None):
+        ok = False
+        try:
+            middleman_order_instance = MiddlemanOrder()
+            user_instance = User.objects.get(pk=input.id_user_id.id)
+            animal_instance = Livestock.objects.get(pk=input.id_animal_id.id_animal)
+            if middleman_order_instance and input:
+                for key, value in input.items():
+                    if key != "id_user_id" and key != "id_animal_id":
+                        setattr(middleman_order_instance, key, value)
+                setattr(middleman_order_instance, "id_user_id", user_instance.id)
+                setattr(
+                    middleman_order_instance, "id_animal_id", animal_instance.id_animal
+                )
+                middleman_order_instance.save()
+                ok = True
+            return CreateMiddlemanOrder(
+                ok=ok, middleman_order=middleman_order_instance, error=None
+            )
+        except Exception as ex:
+            return CreateMiddlemanOrder(ok=ok, middleman_order=None, error=str(ex))
 
 
 class UpdateMiddlemanOrder(graphene.Mutation):
     class Arguments:
-        id = graphene.ID()
         input = MiddlemanOrderInput(required=True)
 
     ok = graphene.Boolean()
-    update_user = graphene.Field(UserNode)
+    error = graphene.String()
+    middleman_order = graphene.Field(MiddlemanOrderNode)
 
     @staticmethod
-    def mutate(root, info, id, input=None):
+    def mutate(root, info, input=None):
         ok = False
         try:
-            user_instance = MiddlemanOrder.objects.get(pk=id)
-            if user_instance and input:
-                for k, v in input.items():
-                    setattr(user_instance, k, v)
-                user_instance.save()
+            id_order = input.id_order
+            middleman_order_instance = MiddlemanOrder.objects.get(pk=id_order)
+            if middleman_order_instance and input:
+                for key, value in input.items():
+                    setattr(middleman_order_instance, key, value)
+                middleman_order_instance.save()
                 ok = True
-                return UpdateMiddlemanOrder(ok=ok, update_user=user_instance)
-        except:
-            return UpdateMiddlemanOrder(ok=ok, update_user=None)
+                return UpdateMiddlemanOrder(
+                    ok=ok, middleman_order=middleman_order_instance, error=None
+                )
+        except Exception as ex:
+            return UpdateMiddlemanOrder(ok=ok, middleman_order=None, error=str(ex))
+
+
+class DeleteMiddlemanOrder(graphene.Mutation):
+    class Arguments:
+        pk = graphene.ID(required=False)
+        input = MiddlemanOrderInput(required=True)
+
+    ok = graphene.Boolean()
+    error = graphene.String()
+
+    @staticmethod
+    def mutate(root, info, pk=None, input=None):
+        ok = False
+        try:
+            if "id_order" in input:
+                middleman_order_instance = MiddlemanOrder.objects.get(pk=input.id_order)
+            else:
+                middleman_order_instance = MiddlemanOrder.objects.get(pk=pk)
+            middleman_order_instance.delete()
+            ok = True
+            return DeleteMiddlemanOrder(ok=ok, error="")
+        except Exception as ex:
+            return DeleteMiddlemanOrder(ok=ok, error=str(ex))
 
 
 class Query(graphene.ObjectType):
     animal = Node.Field(LivestockNode)
     all_animals = DjangoFilterConnectionField(LivestockNode)
-    middlemanorder = Node.Field(MiddlemanOrderNode)
-    all_middlemanorders = DjangoFilterConnectionField(MiddlemanOrderNode)
-    customerorder = Node.Field(CustomerOrderNode)
-    all_customerorders = DjangoFilterConnectionField(CustomerOrderNode)
+    middleman_order = Node.Field(MiddlemanOrderNode)
+    all_middleman_orders = DjangoFilterConnectionField(MiddlemanOrderNode)
+    customer_order = Node.Field(CustomerOrderNode)
+    all_customer_orders = DjangoFilterConnectionField(CustomerOrderNode)
     users = Node.Field(UserNode)
     all_users = DjangoFilterConnectionField(UserNode)
-    farmorder = Node.Field(FarmOrderNode)
-    all_farmorder = DjangoFilterConnectionField(FarmOrderNode)
+    farm_order = Node.Field(FarmOrderNode)
+    all_farm_orders = DjangoFilterConnectionField(FarmOrderNode)
     farm = Node.Field(FarmNode)
-    all_farm = DjangoFilterConnectionField(FarmNode)
+    all_farms = DjangoFilterConnectionField(FarmNode)
 
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     update_user = UpdateUser.Field()
-    create_farm_order = CreateFarmOrder.Field()
-    # update_farm_order = UpdateFarmOrder.Field()
-    # create_MiddlemanOrder = CreateMiddlemanOrder.Field()
-    # update_MiddlemanOrder = UpdateMiddlemanOrder.Field()
     delete_user = DeleteUser.Field()
+    create_farm_order = CreateFarmOrder.Field()
+    update_farm_order = UpdateFarmOrder.Field()
+    delete_farm_order = DeleteFarmOrder.Field()
+    create_customer_order = CreateCustomerOrder.Field()
+    update_customer_order = UpdateCustomerOrder.Field()
+    delete_customer_order = DeleteCustomerOrder.Field()
+    create_middleman_order = CreateMiddlemanOrder.Field()
+    update_middleman_order = UpdateMiddlemanOrder.Field()
+    delete_middleman_order = DeleteMiddlemanOrder.Field()
